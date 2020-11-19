@@ -1,0 +1,25 @@
+[
+    "event",
+    {
+        "type": "donation",
+        "message": [
+            {
+                "name": "DJMoneyKey",
+                "isTest": true,
+                "formatted_amount": "CA$64.00",
+                "amount": 64,
+                "message": "This is a test donation for CA$64.00.",
+                "currency": "CAD",
+                "to": {
+                    "name": "DJMoneyKey"
+                },
+                "from": "John",
+                "from_user_id": 1,
+                "_id": "49c20d2761938087263d13bc60bc7ee9",
+                "priority": 10
+            }
+        ],
+        "for": "streamlabs",
+        "event_id": "evt_997b6df25e2de4c45c1154b400cc0585"
+    }
+]

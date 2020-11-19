@@ -1,0 +1,20 @@
+[
+    "event",
+    {
+        "type": "subscription",
+        "message": [
+            {
+                "name": "DJMoneyKey",
+                "isTest": true,
+                "months": 1,
+                "message": "This is a test",
+                "emotes": null,
+                "sub_plan": "1000",
+                "_id": "be87b9cf4e755becde1a4bdded0d0f56",
+                "priority": 10
+            }
+        ],
+        "for": "twitch_account",
+        "event_id": "evt_5702b76f1ede9804887267e8931f2aff"
+    }
+]

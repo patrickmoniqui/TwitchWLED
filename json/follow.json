@@ -1,0 +1,16 @@
+[
+    "event",
+    {
+        "type": "follow",
+        "message": [
+            {
+                "name": "DJMoneyKey",
+                "isTest": true,
+                "_id": "eac3e077435e11fe2a91c8a5bff6c44e",
+                "priority": 10
+            }
+        ],
+        "for": "twitch_account",
+        "event_id": "evt_4ab52690b170585477394da8059a777b"
+    }
+]

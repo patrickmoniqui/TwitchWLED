@@ -1,16 +1,58 @@
 from twitchchatsocket import TwitchChatSocket
-from ledconnector import LedConnector
+from streamlabsocket import StreamlabSocket
+from wledconnector import WledConnector
 
 class main:
+    # Infos
     server = 'irc.chat.twitch.tv'
     port = 6667
     nickname = 'djmoneykey'
-    token = 'oauth:46pbz90rxxgmjids6du8at9agwzu47'
-    channel = 't4rg3t_d0wn'
+    TwitchChatToken = 'oauth:46pbz90rxxgmjids6du8at9agwzu47'
+    #TwitchChatToken = 'oauth:tt0yvnrm291tb7gb3pb2ig74kizp5x'
+    Channel = 'djmoneykey'
+    StreamlabSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IjgwOUFFMUMyQ0U1NzNEMkM0N0ZBIiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNTAzODgzOTM2IiwiZmFjZWJvb2tfaWQiOiIxMDE1ODAxMjAzNTM3MTM1MiJ9.iYBMaNu7Mo__9-R-JytZLG-vToEuwJqIFwEwlm3GwLg' #Socket token from /socket/token end point
+    WledIps = ['http://192.168.0.216', 'http://192.168.0.217', 'http://192.168.0.218', 'http://192.168.0.219']
+    #WledIps = None
 
-    tsc = TwitchChatSocket(server, port, nickname, token, channel)
-    #tsc.useWled("http://192.168.1.210")
+    wled = None
+    if WledIps:
+        wled = WledConnector.getInstance()
+        wled.setup(WledIps)
 
-    #tsc.connect()
-    #tsc.useBot()
-    #tsc.listen()
+    # Twitch Chat
+    tcs = TwitchChatSocket(server, port, nickname, TwitchChatToken, Channel)
+
+    try: 
+        tcs
+        if wled:
+            tcs.useWled(wled)
+
+        #tcs.useUI()
+        tcsThread = tcs.listen()
+    except:
+        print("Twitch not used")
+    
+    # Streamlab Events
+    ss = StreamlabSocket(StreamlabSocketToken)
+
+    try:
+        ss
+        if wled:
+            ss.useWled(wled)
+
+        ssThread = ss.listen()
+    except:
+        print("Streamlab not used")
+
+    # Wait for threads
+    try:
+        ssThread
+        ssThread.join()
+    except:
+        print("")
+    
+    try:
+        tcsThread
+        tcsThread.join()
+    except:
+        print("")

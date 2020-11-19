@@ -1,71 +1,145 @@
 import requests
 import time
-
+import threading
+import asyncio
 
 class WledConnector:
-    def __init__(self, ip):
-        super().__init__()
-        self.ip = ip
-        self.mode = 0
+    instance = None
+    priority = 0
+    currentPriority = 0
+
+    def setup(self, ips):
+        self.ips = ips
+        self.state = [object] * len(ips)
         self.storeCurrentState()
+        self.cpt = 0
 
-    def setupArtNet(self, universe, first_channel, number_of_channel):
-        self.artnet_universe = universe
-        self.artnet_first_channel = first_channel
-        self.artnet_number_of_channel = number_of_channel
-        #self.artnet_node = ArtNetNode(self.ip)
-        # self.node.start()
-        #self.universe = node.add_universe(0)
-        # self.channel  = universe.add_channel(129,3
-        self.mode = 1
+    @staticmethod 
+    def getInstance():
+        if WledConnector.instance == None:
+            WledConnector()
 
-    def setupApi(self):
-        self.mode = 0
+        return WledConnector.instance
+
+    def __init__(self):
+      """ Virtually private constructor. """
+      if WledConnector.instance != None:
+         raise Exception("This class is a singleton!")
+      else:
+         WledConnector.instance = self
+    
+    def sendSequence(self, A=None, FX=None, SX=None, IX=None, R=None, G=None, B=None, duration=5, priority=0):
+        if self.priority >= self.currentPriority:
+            self.currentPriority = self.priority
+            self.cpt += 1
+
+            if self.cpt == 1:
+                self.storeCurrentState()
+
+            params = "win"
+
+            if A is not None:
+                params+= f"&A={A}"
+
+            if FX is not None:
+                params+= f"&FX={FX}"
+
+            if SX is not None:
+                params+= f"&SX={SX}"
+
+            if IX is not None:
+                params+= f"&IX={IX}"
+
+            if R is not None:
+                params+= f"&R={R}"
+
+            if G is not None:
+                params+= f"&G={G}"
+
+            if B is not None:
+                params+= f"&B={B}"
+
+
+            self.activate = True
+
+            for i in range(0, len(self.ips)):
+                response = requests.get(f"{self.ips[i]}/{params}")
+
+            time.sleep(duration)
+
+            self.activate = False
+
+            if self.cpt == 1:
+                self.restoreCurrentState()
+
+            self.cpt -= 1
+
+            self.currentPriority = 0
+            self.priority = 0
+
+    def blink(self, R, G, B, duration=5):
+        self.priority = 2
+        A = None
+        FX = 1
+        SX = 200
+        IX = 127
+
+        self.sendSequence(A, FX, SX, IX, R, G, B, duration, 1)
+        print("blink sequence done")
 
     def fireOrange(self, duration):
-        print(f"send 'fire' via {self.getMode()}")
-        if self.mode == 0:
-            self.storeCurrentState()
-            params = "win&FX=45&SX=255&IX=255&R=255&G=128&B=0"
-            response = requests.get(f"{self.ip}/{params}")
-            time.sleep(5)
-            self.restoreCurrentState()
+        self.priority = 1
+        A = None
+        FX = 45
+        SX = 255
+        IX = 255
+        R = 255
+        G = 128
+        B = 0
 
-        if self.mode == 1:
-            self.channel.add_fade([255, 0, 0], 5000)
+        self.sendSequence(A, FX, SX, IX, R, G, B, duration, 0)
+        print("fireOrange sequence done")
 
     def fireMauve(self, duration):
-        print(f"send 'fire' via {self.getMode()}")
-        if self.mode == 0:
-            self.storeCurrentState()
-            params = "win&FX=45&SX=255&IX=255&R=138&G=43&B=226"
-            response = requests.get(f"{self.ip}/{params}")
-            time.sleep(5)
-            self.restoreCurrentState()
+        self.priority = 1
+        A = None
+        FX = 45
+        SX = 255
+        IX = 255
+        R = 138
+        G = 42
+        B = 226
 
-        if self.mode == 1:
-            self.channel.add_fade([255, 0, 0], 5000)
+        self.sendSequence(A, FX, SX, IX, R, G, B, duration, 0)
+        print("fireMauve sequence done")
+    
+    def changeColor(self, R, G, B):
 
-    def getMode(self):
-        if self.mode == 0:
-            return "Wled API"
-        if self.mode == 1:
-            return "ArtNet"
+        if (int(R) >= 0 and int(R) <= 255) and (int(G) >= 0 and int(G) <= 255) and (int(B) >= 0 and int(B) <= 255):
+            params = f"win&R={R}&G={G}&B={B}"
+
+            for i in range(0, len(self.ips)):
+                response = requests.get(f"{self.ips[i]}/{params}")
+
+            print("changeColor sequence done")
 
     def storeCurrentState(self):
         params = "json/state"
-        response = requests.get(f"{self.ip}/{params}")
-        self.state = response.json()
+        
+        for i in range(0, len(self.ips)):
+            response = requests.get(f"{self.ips[i]}/{params}")
+            self.state[i] = response.json()
 
     def sendState(self, newState):
         params = "json/state"
-        response = requests.post(f"{self.ip}/{params}", json=newState)
+
+        for i in range(0, len(self.ips)):
+            response = requests.post(f"{self.ips[i]}/{params}", json=newState)
 
     def restoreCurrentState(self):
         print(f"restoring current state")
-        if self.mode == 0:
-            params = "json/state"
-            response = requests.post(f"{self.ip}/{params}", json=self.state)
+        
+        params = "json/state"
 
-        if self.mode == 1:
-            self.channel.add_fade([255, 0, 0], 5000)
+        for i in range(0, len(self.ips)):
+                requests.post(f"{self.ips[i]}/{params}", json=self.state[i])
