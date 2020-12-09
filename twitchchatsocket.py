@@ -175,6 +175,12 @@ class Receive(Thread):
             if len(command) == 4:
                 self.wled.changeColor(int(command[1]), int(command[2]), int(command[3]))
 
+        if "!effect" in message:
+            command = message.split()
+
+            if len(command) == 2:
+                self.wled.changeEffect(int(command[1]))
+
         if "!strobe" in message:
             print(f"changeColor")
             self.wled.sendSequence(128, 79, 255, 255, 0, 0, 255, 3, 1)

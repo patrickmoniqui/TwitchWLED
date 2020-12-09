@@ -77,6 +77,47 @@ class WledConnector:
             self.currentPriority = 0
             self.priority = 0
 
+    def sendSequence2(self, A=None, FX=None, SX=None, IX=None, R=None, G=None, B=None, duration=5, priority=0):
+        if self.priority >= self.currentPriority:
+            self.currentPriority = self.priority
+            self.cpt += 1
+
+            params = "win"
+
+            if A is not None:
+                params+= f"&A={A}"
+
+            if FX is not None:
+                params+= f"&FX={FX}"
+
+            if SX is not None:
+                params+= f"&SX={SX}"
+
+            if IX is not None:
+                params+= f"&IX={IX}"
+
+            if R is not None:
+                params+= f"&R={R}"
+
+            if G is not None:
+                params+= f"&G={G}"
+
+            if B is not None:
+                params+= f"&B={B}"
+
+
+            self.activate = True
+
+            for i in range(0, len(self.ips)):
+                response = requests.get(f"{self.ips[i]}/{params}")
+
+            self.activate = False
+
+            self.cpt -= 1
+
+            self.currentPriority = 0
+            self.priority = 0
+
     def blink(self, R, G, B, duration=5):
         self.priority = 2
         A = None
@@ -112,6 +153,9 @@ class WledConnector:
 
         self.sendSequence(A, FX, SX, IX, R, G, B, duration, 0)
         print("fireMauve sequence done")
+
+    def changeEffect(self, FX):
+        self.sendSequence2(FX=FX, duration=-1)
     
     def changeColor(self, R, G, B):
 

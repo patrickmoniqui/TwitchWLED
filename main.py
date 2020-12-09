@@ -11,7 +11,7 @@ class main:
     #TwitchChatToken = 'oauth:tt0yvnrm291tb7gb3pb2ig74kizp5x'
     Channel = 'djmoneykey'
     StreamlabSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IjgwOUFFMUMyQ0U1NzNEMkM0N0ZBIiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNTAzODgzOTM2IiwiZmFjZWJvb2tfaWQiOiIxMDE1ODAxMjAzNTM3MTM1MiJ9.iYBMaNu7Mo__9-R-JytZLG-vToEuwJqIFwEwlm3GwLg' #Socket token from /socket/token end point
-    WledIps = ['http://192.168.0.216', 'http://192.168.0.217', 'http://192.168.0.218', 'http://192.168.0.219']
+    WledIps = ['http://192.168.0.210', 'http://192.168.0.211', 'http://192.168.0.212', 'http://192.168.0.213']
     #WledIps = None
 
     wled = None
