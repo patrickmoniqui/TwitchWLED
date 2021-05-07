@@ -7,12 +7,14 @@ class WledConnector:
     instance = None
     priority = 0
     currentPriority = 0
+    effects = []
 
     def setup(self, ips):
         self.ips = ips
         self.state = [object] * len(ips)
         self.storeCurrentState()
         self.cpt = 0
+        self.effects = self.getListEffects()
 
     @staticmethod 
     def getInstance():
@@ -77,7 +79,7 @@ class WledConnector:
             self.currentPriority = 0
             self.priority = 0
 
-    def sendSequence2(self, A=None, FX=None, SX=None, IX=None, R=None, G=None, B=None, duration=5, priority=0):
+    def sendSequence2(self, A=None, FX=None, SX=None, IX=None, R=None, G=None, B=None, priority=0, duration=-1):
         if self.priority >= self.currentPriority:
             self.currentPriority = self.priority
             self.cpt += 1
@@ -155,7 +157,26 @@ class WledConnector:
         print("fireMauve sequence done")
 
     def changeEffect(self, FX):
-        self.sendSequence2(FX=FX, duration=-1)
+
+        if FX.isdigit():
+           self.sendSequence2(FX=FX, duration=-1)
+        else: 
+            if isinstance(FX, str):
+                for idx, val in enumerate(self.effects):
+                    if val.replace(" ", "").lower() == FX.lower():
+                        self.sendSequence2(FX=idx, duration=-1)
+                        break
+
+    def changeSpeed(self, SX):
+        if SX.isdigit():
+            self.sendSequence2(SX=SX)
+
+    def changeIntensity(self, IX):
+        if IX.isdigit():
+           self.sendSequence2(IX=IX)
+
+    def reset(self):
+        self.sendSequence2(A=255, SX=127, IX=127, FX=0)
     
     def changeColor(self, R, G, B):
 
@@ -166,6 +187,12 @@ class WledConnector:
                 response = requests.get(f"{self.ips[i]}/{params}")
 
             print("changeColor sequence done")
+
+    def getListEffects(self):
+        params = "json/effects"
+
+        response = requests.get(f"{self.ips[0]}/{params}")
+        return response.json()
 
     def storeCurrentState(self):
         params = "json/state"

@@ -1,3 +1,4 @@
 {
-    "remote.SSH.showLoginTerminal": true
+    "remote.SSH.showLoginTerminal": true,
+    "jupyter.jupyterServerType": "local"
 }

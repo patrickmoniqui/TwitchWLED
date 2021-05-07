@@ -57,7 +57,7 @@ class TwitchChatSocket:
             self.receiceThread = Receive(self.sock)
 
         # bot
-        #self.timer("djmone2Fire", 60)
+        #self.timer("CurseLit", 1)
 
         self.receiceThread.start()
 
@@ -156,30 +156,52 @@ class Receive(Thread):
     def useUI(self, ui):
         self.ui = ui
 
-    def manageChangeColor(self, message):
+    def manageChangeColor(self, message, user):
 
+        allowedUsers = ''
         if not message[0] == '!':
             return
 
         msg = message[1:len(message)].replace('\r\n', '').lower()
 
-        for color in self.rgb_colors:
-            if(msg in color['name'].lower()):
-                print(f"changeColor")
-                self.wled.changeColor(color['rgb']['r'], color['rgb']['g'], color['rgb']['b'])
-                return
+        if allowedUsers in user:
+            for color in self.rgb_colors:
+                if(msg in color['name'].lower()):
+                    print(f"changeColor")
+                    self.wled.changeColor(color['rgb']['r'], color['rgb']['g'], color['rgb']['b'])
+                    return
 
-        if "!color" in message:
+        if "!color" in message and allowedUsers in user:
             command = message.split()
 
             if len(command) == 4:
                 self.wled.changeColor(int(command[1]), int(command[2]), int(command[3]))
 
-        if "!effect" in message:
+        if "!effect" in message and allowedUsers in user:
             command = message.split()
 
             if len(command) == 2:
-                self.wled.changeEffect(int(command[1]))
+                effect = command[1]
+                self.wled.changeEffect(effect)
+
+        if "!speed" in message and allowedUsers in user:
+            command = message.split()
+
+            if len(command) == 2:
+                speed = command[1]
+                self.wled.changeSpeed(speed)
+
+        if "!intensity" in message and allowedUsers in user:
+            command = message.split()
+
+            if len(command) == 2:
+                intensity = command[1]
+                self.wled.changeIntensity(intensity)
+
+        if "!reset" in message and allowedUsers in user:
+            command = message.split()
+            self.wled.reset()
+
 
         if "!strobe" in message:
             print(f"changeColor")
@@ -222,65 +244,4 @@ class Receive(Thread):
                         self.wled.sendSequence(128, 79, 255, 255, 0, 0, 255, 3, 1)
 
                 # change color in chat
-                self.manageChangeColor(message)
-                
-
-class UI(Thread):
-    def __init__(self, socket):
-        Thread.__init__(self)
-        self.socket = socket
-        self.start()
-
-    def run(self):
-        window = tk.Tk()
-        label = tk.Label(text="Twitch username")
-        self.channelEntry = tk.Entry()
-        self.channelEntry.insert(0, self.socket.channel)
-        self.lblConnected = tk.Label(text="Disconnected", fg="red")
-        self.btnConnect = tk.Button(text='Connect', command=self.btnConnectClick)
-        cbLed = tk.Checkbutton(text="WLED integration")
-        self.chatMessages = tkst.ScrolledText(
-            wrap   = tk.WORD,
-        )
-
-        self.btnSpam = tk.Button(text="Spam", command=self.socket.spamBot)
-        self.entrySpam = tk.Entry()
-
-        self.cbMaxVar = int(0)
-        self.cbMax = tk.Checkbutton(text="Max", variable=self.cbMaxVar)
-        self.cbMax.var = self.cbMaxVar
-
-        self.entrySpamDuration = tk.Entry()
-
-        label.pack()
-        self.channelEntry.pack()
-        cbLed.pack()
-        self.lblConnected.pack()
-        self.btnConnect.pack()
-        
-        self.entrySpam.pack()
-        self.cbMax.pack()
-        self.entrySpamDuration.pack()
-
-        self.btnSpam.pack()
-        
-        self.chatMessages.pack()
-
-        window.mainloop()
-
-    def receveiceMessage(self, user, message):
-        self.chatMessages.insert(tk.INSERT, f"{user} : {message}")
-
-    def btnConnectClick(self):
-        self.channel = self.channelEntry.get()
-
-        if self.connected:
-            self.disconect()
-            self.lblConnected.config(text='Disconnected', fg="red")
-            self.btnConnect.config(text='Connect')
-        else:
-            if self.connect():
-                self.listen()
-                self.lblConnected.config(text='Connected', fg="green")
-                self.btnConnect.config(text='Disconnect')
-                print("connected")
+                self.manageChangeColor(message, user)
